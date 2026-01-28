@@ -13,8 +13,88 @@ model User {
   email     String   @unique @db.VarChar(150)
   address   String   @db.VarChar(255)
   password  String   @db.VarChar(100)
+
+  plan      String   @db.VarChar(20) // free | gold
+  expiresAt DateTime?                // expiração do plano
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt 
+
+  transactions  Transaction[]
+  categories    Category[]
+  creditCards   CreditCard[]
+  bankAccounts  BankAccount[]
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String
+
+  amount    Float
+  status    String   @db.VarChar(20) // pending | paid | canceled
+  dueDate   DateTime                 // vencimento da fatura
+  paidAt    DateTime?                // data de pagamento
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id     String  @id @default(uuid())
+  userId String
+
+  name  String  @db.VarChar(100)
+  icon  String  @db.VarChar(50)
+  color String  @db.VarChar(20)
+  type  String  @db.VarChar(20) // income | expense
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model CreditCard {
+  id     String  @id @default(uuid())
+  userId String
+
+  name        String
+  closingDate Int
+  currentBill Float
+  limit       Float
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model BankAccount {
+  id     String  @id @default(uuid())
+  userId String
+
+  name    String
+  type    String
+  balance Float
+  icon    String
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  creditCardId  String?
+  bankAccountId String?
+
+  description String   @db.VarChar(100)
+  date        DateTime @default(now())
+  value       Float
+  status      String   @db.VarChar(20)
+  type        String   @db.VarChar(25)
+
+  user User @relation(fields: [userId], references: [id])
+
+  creditCard  CreditCard?  @relation(fields: [creditCardId], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
 }
 
 
