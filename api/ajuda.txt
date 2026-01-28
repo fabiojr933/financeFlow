@@ -1,0 +1,8 @@
+npx prisma migrate dev --name init --schema=src/database/prisma/schema.prisma
+ou
+npx prisma migrate dev --name init
+
+
+apaga tudo 
+npx prisma migrate reset
+
