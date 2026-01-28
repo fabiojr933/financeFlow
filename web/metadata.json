@@ -1,0 +1,5 @@
+{
+  "name": "FinanceFlow",
+  "description": "A comprehensive financial management dashboard featuring real-time cash flow tracking, transaction history, multi-step transaction entry, account management, and AI-powered financial insights using Gemini.",
+  "requestFramePermissions": []
+}
