@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////////////////////
+// ENUMS
+//////////////////////////////////////
+
+enum PlanType {
+  FREE
+  GOLD
+}
+
+//////////////////////////////////////
+// MODELS
+//////////////////////////////////////
+
+
 model User {
   id        String   @id @default(uuid())
   name      String   @db.VarChar(100)
@@ -14,60 +28,56 @@ model User {
   address   String   @db.VarChar(255)
   password  String   @db.VarChar(100)
 
-  plan      String   @db.VarChar(20) // free | gold
-  expiresAt DateTime?                // expiração do plano
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  expiresAt DateTime?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
 
   transactions  Transaction[]
   categories    Category[]
   creditCards   CreditCard[]
   bankAccounts  BankAccount[]
-  subscriptions Subscription[]
+  invoices      InvoiceCreditCard[]
 }
 
-model Subscription {
-  id        String   @id @default(uuid())
-  userId    String
+model Plan {
+  id     String   @id @default(uuid())
+  type   PlanType @unique
+  amount Float
 
-  amount    Float
-  status    String   @db.VarChar(20) // pending | paid | canceled
-  dueDate   DateTime                 // vencimento da fatura
-  paidAt    DateTime?                // data de pagamento
-
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
+  users User[]
 }
 
 model Category {
-  id     String  @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
 
-  name  String  @db.VarChar(100)
-  icon  String  @db.VarChar(50)
-  color String  @db.VarChar(20)
-  type  String  @db.VarChar(20) // income | expense
+  name  String @db.VarChar(100)
+  icon  String @db.VarChar(50)
+  color String @db.VarChar(20)
+  type  String @db.VarChar(20) // income | expense
 
-  user User @relation(fields: [userId], references: [id])
+  user     User                @relation(fields: [userId], references: [id])
+  invoices InvoiceCreditCard[] // 👈 RELAÇÃO INVERSA
 }
 
+
 model CreditCard {
-  id     String  @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
 
   name        String
   closingDate Int
-  currentBill Float
   limit       Float
 
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
+  user     User                  @relation(fields: [userId], references: [id])
+  invoices InvoiceCreditCard[]
 }
 
 model BankAccount {
-  id     String  @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
 
   name    String
@@ -82,7 +92,6 @@ model BankAccount {
 model Transaction {
   id            String   @id @default(uuid())
   userId        String
-  creditCardId  String?
   bankAccountId String?
 
   description String   @db.VarChar(100)
@@ -91,10 +100,24 @@ model Transaction {
   status      String   @db.VarChar(20)
   type        String   @db.VarChar(25)
 
-  user User @relation(fields: [userId], references: [id])
-
-  creditCard  CreditCard?  @relation(fields: [creditCardId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
   bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
 }
 
+model InvoiceCreditCard {
+  id           String   @id @default(uuid())
+  userId       String
+  creditCardId String
+  categoryId   String?
 
+  amount  Float
+  status  String   @db.VarChar(20) // pending | paid | canceled
+  dueDate DateTime
+  paidAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  creditCard CreditCard  @relation(fields: [creditCardId], references: [id])
+  category   Category?   @relation(fields: [categoryId], references: [id])
+}
