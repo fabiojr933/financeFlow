@@ -5,7 +5,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "prisma": {
-    "schema": "src/database/prisma/schema.prisma"
+    "schema": "src/database/prisma/schema.prisma",
+     "seed": "ts-node src/database/prisma/seed.ts"
   },
   "author": "",
   "license": "ISC",
