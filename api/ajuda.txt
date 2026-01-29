@@ -3,6 +3,11 @@ ou
 npx prisma migrate dev --name init
 
 
+seeds
+npx prisma db seed
+
+
+
 apaga tudo 
 npx prisma migrate reset
 
